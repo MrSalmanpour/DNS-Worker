@@ -199,7 +199,7 @@ export async function getDomainGeoLocation(domain: string): Promise<string> {
   }
 
   if (!cleanDomain || cleanDomain === "localhost" || cleanDomain === "127.0.0.1" || cleanDomain === "::1") {
-    return "Localhost / 127.0.0.1 🏠";
+    return "Localhost / 127.0.0.1 🛜";
   }
 
   if (
@@ -207,7 +207,7 @@ export async function getDomainGeoLocation(domain: string): Promise<string> {
     cleanDomain.startsWith("10.") ||
     /^172\.(1[6-9]|2\d|3[01])\./.test(cleanDomain)
   ) {
-    return "Private Network (LAN) 🏠";
+    return "Private Network (LAN) 🛜";
   }
 
   // If it's a domain name, resolve an IP first

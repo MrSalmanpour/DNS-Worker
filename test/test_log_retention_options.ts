@@ -145,9 +145,9 @@ async function runTests(): Promise<void> {
   const { getFlagEmoji } = await import('../web/src/utils/getFlagEmoji');
   assert.strictEqual(getFlagEmoji('CN'), '🇨🇳', 'CN must produce China flag');
   assert.strictEqual(getFlagEmoji('US'), '🇺🇸', 'US must produce US flag');
-  assert.strictEqual(getFlagEmoji('LAN'), '🏠', 'LAN must produce home emoji');
-  assert.strictEqual(getFlagEmoji('LOCAL'), '🏠', 'LOCAL must produce home emoji');
-  assert.strictEqual(getFlagEmoji('PRIVATE'), '🏠', 'PRIVATE must produce home emoji');
+  assert.strictEqual(getFlagEmoji('LAN'), '🛜', 'LAN must produce home emoji');
+  assert.strictEqual(getFlagEmoji('LOCAL'), '🛜', 'LOCAL must produce home emoji');
+  assert.strictEqual(getFlagEmoji('PRIVATE'), '🛜', 'PRIVATE must produce home emoji');
   assert.strictEqual(getFlagEmoji('UN'), '🌐', 'UN must produce globe emoji (not UN flag)');
   assert.strictEqual(getFlagEmoji('UNKNOWN'), '🌐', 'UNKNOWN must produce globe emoji');
   assert.strictEqual(getFlagEmoji('XX'), '🌐', 'XX must produce globe emoji');
