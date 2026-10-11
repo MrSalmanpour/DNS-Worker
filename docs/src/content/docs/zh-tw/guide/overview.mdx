@@ -43,8 +43,8 @@ DNS Worker 會自動記錄並將解析歸屬地上報繪製成全球流向地圖
 
 ### 1. 全協議棧覆蓋
 * **傳統 UDP 53 (RFC 1035)**：相容傳統路由器、區域網裝置以及系統底層網路設定。
-* **加密 DoT 853 (RFC 7858)**：基於 853 埠的高效能加密傳輸，支援 TLS SNI 多接入點分流（`<profileKey>.dns.example.com`），原生契合 Android 9+ 私有 DNS。
-* **加密 DoH (RFC 8484)**：支援 HTTP/2 及 HTTP/3 (Alt-Svc) 的安全傳輸協議，適用於主流現代瀏覽器。
+* **加密 DoT 853 (RFC 7858)**：基於 853 埠的高效能加密傳輸，相容 DoQ 極速握手，支援 TLS SNI 多接入點分流（`<profileKey>.dns.example.com`），原生契合 Android 9+ 私有 DNS。
+* **加密 DoH (RFC 8484)**：全面相容 HTTP/2 與 HTTP/3 (Alt-Svc) 的安全傳輸協議，適用於主流現代瀏覽器。
 * **加密 DoQ (RFC 9250)**：基於 QUIC 協議的高效能 DNS，具備 0-RTT 極速握手並徹底消除隊頭阻塞。
 * **ECH 與 DDR (RFC 9460)**：廣播加密客戶端問候（ECH）與專用解析器自動發現（DDR）記錄。
 

@@ -43,8 +43,8 @@ DNS Worker automatically maps DNS resolution destinations and upstream recursive
 
 ### 1. Full-Stack Protocol Coverage
 * **Classic UDP 53 (RFC 1035)**: Standard DNS resolution for routers, LAN devices, and system-wide configurations.
-* **DoT 853 (RFC 7858)**: Encrypted DNS over dedicated port 853 with TLS SNI profile routing (`<profileKey>.dns.example.com`), natively compatible with Android 9+ Private DNS.
-* **DoH (RFC 8484)**: Fast encrypted DNS over HTTP/2 and HTTP/3 (Alt-Svc) for all modern web browsers.
+* **DoT 853 (RFC 7858)**: Encrypted DNS over dedicated port 853 with DoQ compatibility and TLS SNI profile routing (`<profileKey>.dns.example.com`), natively compatible with Android 9+ Private DNS.
+* **DoH (RFC 8484)**: Fully compatible with HTTP/2 and HTTP/3 (Alt-Svc) for secure, low-latency transport across modern web browsers.
 * **DoQ (RFC 9250)**: Encrypted DNS over QUIC with 0-RTT handshakes and zero head-of-line blocking.
 * **ECH & DDR (RFC 9460)**: Broadcast Encrypted Client Hello parameters and outer SNI, paired with Discovery of Designated Resolvers (DDR).
 
