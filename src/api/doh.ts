@@ -4,7 +4,11 @@ import { pipeline } from '../pipeline';
 import { ProfileModel, ProfileWithBloom } from '../models/profile';
 import { UserModel } from '../models/user';
 import { cacheUtils } from '../utils/cache';
-import { profileKeyMemoryMap } from '../pipeline/cache';
+import {
+  profileKeyMemoryMap,
+  defaultProfileMemoryCache,
+  setDefaultProfileMemoryCache
+} from '../pipeline/cache';
 import { resolveUpstreamEndpoint, fetchFromUpstream } from '../pipeline/resolver/transport';
 
 /**
@@ -104,15 +108,24 @@ export async function resolveProfileByKey(
 
 /**
  * Resolves default profile when no profile key is specified in connection or query.
+ * Uses L1 in-memory caching to eliminate redundant SQLite round-trips under high UDP DNS load.
  */
 export async function resolveDefaultProfile(
   env: Env,
   ctx: ExecutionContext
 ): Promise<(ProfileWithBloom & { access_point_id?: string; access_point_name?: string }) | null> {
+  const now = Date.now();
+  if (defaultProfileMemoryCache && now - defaultProfileMemoryCache.ts < 300_000) {
+    return defaultProfileMemoryCache.data;
+  }
+
   const defaultKey = env.SERVERFULL_DEFAULT_PROFILE_KEY || env.DEFAULT_PROFILE_KEY;
   if (defaultKey) {
     const profile = await resolveProfileByKey(defaultKey, env, ctx);
-    if (profile) return profile;
+    if (profile) {
+      setDefaultProfileMemoryCache({ data: profile, ts: now });
+      return profile;
+    }
   }
 
   try {
@@ -120,13 +133,16 @@ export async function resolveDefaultProfile(
     const profiles = await profileModel.list("ORDER BY created_at ASC LIMIT 1", []);
     if (profiles && profiles.length > 0) {
       const fullProfile = await profileModel.getById(profiles[0].id);
-      if (fullProfile) return fullProfile;
+      if (fullProfile) {
+        setDefaultProfileMemoryCache({ data: fullProfile, ts: now });
+        return fullProfile;
+      }
     }
   } catch (e: any) {
     console.warn("[Profile] Failed to query fallback default profile:", e.message || e);
   }
 
-  return {
+  const fallbackProfile = {
     id: "default",
     name: "Default Profile",
     settings: JSON.stringify({
@@ -136,9 +152,12 @@ export async function resolveDefaultProfile(
       ecs: { enabled: true, use_client_ip: true }
     }),
     owner_id: "system",
-    created_at: Math.floor(Date.now() / 1000),
-    updated_at: Math.floor(Date.now() / 1000)
+    created_at: Math.floor(now / 1000),
+    updated_at: Math.floor(now / 1000)
   } as any;
+
+  setDefaultProfileMemoryCache({ data: fallbackProfile, ts: now });
+  return fallbackProfile;
 }
 
 /**
