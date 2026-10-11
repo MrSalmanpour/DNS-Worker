@@ -58,7 +58,7 @@ docker run -d \
   -v dns_worker_data:/var/lib/dns-worker \
   -v dns_worker_config:/etc/dns-worker \
   -v /etc/letsencrypt:/etc/ssl/dns-worker:ro \
-  dns-worker:latest
+  hugokoo/dns-worker:latest
 ```
 
 > [!TIP]
@@ -78,15 +78,17 @@ docker run -d \
 
 ### Building & Publishing to Docker Hub
 
+Images can be published automatically via GitHub Actions upon pushing Git release tags (`v*`), or manually built using CLI scripts:
+
 ```bash
 # Build local images with auto-tagging
-npm run docker:build -- --repo=yourusername/dns-worker
+npm run docker:build
 
 # Build multi-platform images (linux/amd64, linux/arm64) and push to Docker Hub
-npm run docker:multiarch -- --repo=yourusername/dns-worker --push
+npm run docker:multiarch -- --push
 
 # Push existing local tags to Docker Hub
-npm run docker:push -- --repo=yourusername/dns-worker
+npm run docker:push
 ```
 
 ---

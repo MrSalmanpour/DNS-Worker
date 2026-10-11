@@ -9,6 +9,7 @@
 
 [![License: AGPL v3](https://img.shields.io/badge/License-AGPL%20v3-blue.svg)](LICENSE)
 [![npm: dns-worker](https://img.shields.io/npm/v/dns-worker.svg?logo=npm&color=CB3837)](https://www.npmjs.com/dns-worker)
+[![Docker: hugokoo/dns-worker](https://img.shields.io/badge/docker-hugokoo%2Fdns--worker-2496ED.svg?logo=docker)](https://hub.docker.com/r/hugokoo/dns-worker)
 [![Platform: Cloudflare Workers](https://img.shields.io/badge/Platform-Cloudflare%20Workers-orange.svg)](https://workers.cloudflare.com/)
 [![Runtime: Node.js / Bun](https://img.shields.io/badge/Runtime-Node.js%20%7C%20Bun-green.svg)](https://nodejs.org/)
 [![Security: NIST FIPS 203 PQC](https://img.shields.io/badge/Security-NIST%20FIPS%20203%20PQC-purple.svg)](https://csrc.nist.gov/pubs/fips/203/final)
@@ -56,7 +57,7 @@ docker run -d \
   -v dns_worker_data:/var/lib/dns-worker \
   -v dns_worker_config:/etc/dns-worker \
   -v /etc/letsencrypt:/etc/ssl/dns-worker:ro \
-  dns-worker:latest
+  hugokoo/dns-worker:latest
 
 # 访问控制台: https://your-domain-or-ip (配置证书后，80 端口自动跳转 HTTPS)
 ```

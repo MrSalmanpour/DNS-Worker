@@ -1,9 +1,9 @@
 # syntax=docker/dockerfile:1
 
 # ==============================================================================
-# Stage 1: Build Web Dashboard & Serverfull Bundle
+# Stage 1: Build Web Dashboard & Serverfull Bundle (Runs natively on host platform)
 # ==============================================================================
-FROM node:22-bookworm-slim AS builder
+FROM --platform=$BUILDPLATFORM node:22-bookworm-slim AS builder
 WORKDIR /app
 
 # Copy dependency manifests first for optimal Docker layer caching

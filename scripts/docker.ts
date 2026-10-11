@@ -49,7 +49,7 @@ function getPackageMeta(): PackageMeta {
 function parseCliArgs(args: string[]): { command: string; repo: string; platforms: string; push: boolean } {
   const meta = getPackageMeta();
   let command = 'build';
-  let repo = process.env.DOCKER_REPO || process.env.DOCKER_IMAGE || meta.name;
+  let repo = process.env.DOCKER_REPO || process.env.DOCKER_IMAGE || 'hugokoo/dns-worker';
   let platforms = process.env.DOCKER_PLATFORMS || 'linux/amd64,linux/arm64';
   let push = false;
 
@@ -109,8 +109,8 @@ Runtime: Bun LTS (oven/bun:1-slim)
   npm run docker:run        [-- --repo=<name>]             Run container locally in detached mode
 
 \x1b[1mOptions:\x1b[0m
-  --repo=<name>         Target Docker Hub repository (default: ${meta.name} or $DOCKER_REPO)
-                        Example: --repo=yourusername/dns-worker
+  --repo=<name>         Target Docker Hub repository (default: hugokoo/dns-worker or $DOCKER_REPO)
+                        Example: --repo=hugokoo/dns-worker
   --platforms=<list>    Target platforms for multiarch build (default: linux/amd64,linux/arm64)
   --push                Immediately push images after building (used with multiarch)
 

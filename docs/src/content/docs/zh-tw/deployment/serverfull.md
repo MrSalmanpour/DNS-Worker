@@ -58,7 +58,7 @@ docker run -d \
   -v dns_worker_data:/var/lib/dns-worker \
   -v dns_worker_config:/etc/dns-worker \
   -v /etc/letsencrypt:/etc/ssl/dns-worker:ro \
-  dns-worker:latest
+  hugokoo/dns-worker:latest
 ```
 
 > [!TIP]
@@ -78,15 +78,17 @@ docker run -d \
 
 ### 打包與發布至 Docker Hub
 
+映像檔在推送 Git 發版標籤（`v*`）時會自動透過 GitHub Actions 建置並發布至 Docker Hub，亦可在本地透過指令碼手動建置發布：
+
 ```bash
 # 本地建置映像檔（自動讀取 package.json 版本並加上標籤）
-npm run docker:build -- --repo=yourusername/dns-worker
+npm run docker:build
 
 # 多架構打包（linux/amd64, linux/arm64）並發布至 Docker Hub
-npm run docker:multiarch -- --repo=yourusername/dns-worker --push
+npm run docker:multiarch -- --push
 
 # 推送本地標籤至 Docker Hub
-npm run docker:push -- --repo=yourusername/dns-worker
+npm run docker:push
 ```
 
 ---
