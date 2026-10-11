@@ -1,34 +1,17 @@
-import React, { useState, useEffect, useCallback } from "react";
-import { Card, Elevation, H4, Button, Intent, Callout, Tag, Spinner } from "@blueprintjs/core";
-import { Trash2, Database } from "lucide-react";
+import React, { useState } from "react";
+import { Card, Elevation, H4, Button, Intent, Callout } from "@blueprintjs/core";
+import { Trash2 } from "lucide-react";
 import { useTranslation } from "react-i18next";
-import { clearLogs, deleteMe, getDatabaseSize, type DatabaseSizeInfo } from "../../../services";
+import { clearLogs, deleteMe } from "../../../services";
 
 export interface DangerZoneCardProps {
   isAdmin: boolean;
+  onLogsCleared?: () => void;
 }
 
-export const DangerZoneCard: React.FC<DangerZoneCardProps> = ({ isAdmin }) => {
+export const DangerZoneCard: React.FC<DangerZoneCardProps> = ({ isAdmin, onLogsCleared }) => {
   const { t } = useTranslation();
-  const [dbSize, setDbSize] = useState<DatabaseSizeInfo | null>(null);
-  const [loadingSize, setLoadingSize] = useState<boolean>(true);
   const [clearingLogs, setClearingLogs] = useState<boolean>(false);
-
-  const fetchDbSize = useCallback(async () => {
-    setLoadingSize(true);
-    try {
-      const data = await getDatabaseSize();
-      setDbSize(data);
-    } catch (e) {
-      console.error("Failed to fetch database size:", e);
-    } finally {
-      setLoadingSize(false);
-    }
-  }, []);
-
-  useEffect(() => {
-    fetchDbSize();
-  }, [fetchDbSize]);
 
   const handleClearAllLogs = async () => {
     if (!confirm(t("account.confirmClearLogs"))) return;
@@ -36,7 +19,7 @@ export const DangerZoneCard: React.FC<DangerZoneCardProps> = ({ isAdmin }) => {
     try {
       await clearLogs();
       alert(t("account.clearLogsSuccess"));
-      await fetchDbSize();
+      onLogsCleared?.();
     } catch (e) {
       console.error(e);
     } finally {
@@ -65,34 +48,6 @@ export const DangerZoneCard: React.FC<DangerZoneCardProps> = ({ isAdmin }) => {
           <div>
             <H4>{t("account.clearLogs")}</H4>
             <p className="text-xs opacity-60 mb-3">{t("account.clearLogsDesc")}</p>
-            <div className="flex items-center justify-between p-2.5 mb-4 bg-gray-50 dark:bg-gray-800 rounded border border-gray-200 dark:border-gray-700">
-              <div className="flex items-center gap-2 text-xs">
-                <Database size={15} className="text-gray-500 flex-shrink-0" />
-                <span className="text-gray-700 dark:text-gray-300 font-medium">
-                  {t("account.currentDbSize")}:
-                </span>
-                {loadingSize ? (
-                  <Spinner size={14} />
-                ) : (
-                  <Tag
-                    minimal
-                    round
-                    intent={Intent.PRIMARY}
-                    className="font-mono font-semibold"
-                  >
-                    {dbSize?.formatted || "0 B"}
-                  </Tag>
-                )}
-              </div>
-              <Button
-                minimal
-                small
-                icon="refresh"
-                loading={loadingSize}
-                onClick={fetchDbSize}
-                title={t("common.refresh") || "Refresh"}
-              />
-            </div>
           </div>
           <Button
             fill

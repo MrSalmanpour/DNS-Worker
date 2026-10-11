@@ -57,13 +57,13 @@ DNS Worker supports all major modern encrypted DNS protocols alongside classic U
 
 | Protocol | Endpoint Format | Applicable Environments |
 | :--- | :--- | :--- |
-| **DoH (DNS over HTTPS)** | `https://<domain>/dns-query/<profileKey>` | Browsers, Windows 11, iOS/macOS profiles, curl |
-| **DoT (DNS over TLS)** | `tls://<profileKey>.<dotDomain>:853` | Linux `systemd-resolved`, Stubby, Android Private DNS |
+| **DoH (DNS over HTTPS)** | `https://<domain>/dns-query/<profileKey>` | HTTP/2 & HTTP/3 compatible; Browsers, Windows 11, iOS/macOS profiles, curl |
+| **DoT (DNS over TLS)** | `tls://<profileKey>.<dotDomain>:853` | DoQ (RFC 9250) compatible; Linux `systemd-resolved`, Stubby, Android Private DNS |
 | **Android Private DNS** | `<profileKey>.<dotDomain>` | Android 9+ native Private DNS |
 | **Classic UDP (Do53)** | `udp://<server-ip>:53` | Legacy routers, IoT devices, local testing |
 
 > [!NOTE]
-> In Serverfull mode, DoT profile routing utilizes **TLS Server Name Indication (SNI)**. When connecting via `<profileKey>.<dotDomain>`, the server parses the sub-hostname during the TLS ClientHello before decrypting traffic, routing queries directly to the target profile.
+> In Serverfull mode, DoT profile routing utilizes **TLS Server Name Indication (SNI)**. When connecting via `<profileKey>.<dotDomain>`, the server parses the sub-hostname during the TLS ClientHello before decrypting traffic, routing queries directly to the target profile. It is also compatible with QUIC-based DoQ transport.
 
 ---
 

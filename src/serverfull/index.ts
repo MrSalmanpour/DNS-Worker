@@ -450,7 +450,12 @@ async function bootstrap(): Promise<void> {
   console.log(formatKeyValueSection({
     title: '[Services] Configured Ports & Transports:',
     items: [
-      { label: 'Web Dashboard & DoH (HTTP)', value: `http://${config.host}:${config.httpPort}` },
+      {
+        label: 'Web Dashboard & DoH (HTTP)',
+        value: canStartHttps
+          ? `http://${config.host}:${config.httpPort} (Redirects to HTTPS)`
+          : `http://${config.host}:${config.httpPort}`
+      },
       { label: 'Web Dashboard & DoH (HTTPS)', value: httpsDisplay },
       { label: 'Classic UDP DNS', value: config.disableUdp ? 'Disabled' : `udp://${config.host}:${config.udpPort}` },
       { label: 'DNS over TLS (DoT)', value: dotDisplay }
@@ -494,7 +499,11 @@ async function bootstrap(): Promise<void> {
   const httpServer = new HttpServer({
     port: config.httpPort,
     host: config.host,
-    env
+    env,
+    httpsRedirect: canStartHttps ? {
+      enabled: true,
+      httpsPort: config.httpsPort
+    } : undefined
   });
 
   const httpsServer = canStartHttps ? new HttpsServer({

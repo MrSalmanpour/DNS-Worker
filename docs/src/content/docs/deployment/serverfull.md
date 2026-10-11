@@ -39,6 +39,60 @@ dns-worker config init
 
 ---
 
+## Docker Deployment (Bun LTS Runtime)
+
+DNS Worker provides an official containerized workflow powered by **Bun LTS** (`oven/bun:1-slim`) for minimal memory footprint and instant startup.
+
+### Quick Run with Docker
+
+Run the container in detached mode with persistent volumes for database, configuration, and TLS certificates:
+
+```bash
+docker run -d \
+  --name dns-worker \
+  --restart unless-stopped \
+  -p 53:53/udp \
+  -p 853:853/tcp \
+  -p 80:80/tcp \
+  -p 443:443/tcp \
+  -v dns_worker_data:/var/lib/dns-worker \
+  -v dns_worker_config:/etc/dns-worker \
+  -v /etc/letsencrypt:/etc/ssl/dns-worker:ro \
+  hugokoo/dns-worker:latest
+```
+
+> [!TIP]
+> **HTTPS Auto-Redirection**: Direct use of plain HTTP is not recommended in production. When TLS certificates are mounted to `/etc/ssl/dns-worker` (or configured via `SERVERFULL_TLS_CERT_PATH`), DNS Worker activates HTTPS on port 443, and all plain HTTP requests arriving on port 80 will **automatically redirect to HTTPS (HTTP 301/307)**.
+
+### Docker Volume & Port Reference
+
+- **Ports**:
+  - `53:53/udp`: Classic UDP DNS (RFC 1035)
+  - `853:853/tcp`: DNS over TLS (DoT, RFC 7858, DoQ compatible)
+  - `80:80/tcp`: HTTP Web Dashboard (Auto-redirects to HTTPS 443)
+  - `443:443/tcp`: HTTPS Web Dashboard & DoH (Primary / Recommended)
+- **Volumes**:
+  - `/var/lib/dns-worker`: Holds persistent SQLite database (`dns_worker.sqlite`) and auto-generated JWT secrets.
+  - `/etc/dns-worker`: Mount host directory to provide custom `.env` configuration file.
+  - `/etc/ssl/dns-worker`: Mount host TLS certificates (`fullchain.pem` and `privkey.pem`) for automatic discovery and HTTPS activation.
+
+### Building & Publishing to Docker Hub
+
+Images can be published automatically via GitHub Actions upon pushing Git release tags (`v*`), or manually built using CLI scripts:
+
+```bash
+# Build local images with auto-tagging
+npm run docker:build
+
+# Build multi-platform images (linux/amd64, linux/arm64) and push to Docker Hub
+npm run docker:multiarch -- --push
+
+# Push existing local tags to Docker Hub
+npm run docker:push
+```
+
+---
+
 ## Ports & Network Configuration
 
 Customize listening ports in `/etc/dns-worker/.env`:

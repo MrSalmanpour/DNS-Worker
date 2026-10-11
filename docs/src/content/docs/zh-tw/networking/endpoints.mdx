@@ -57,13 +57,13 @@ DNS Worker 支援所有主流現代加密 DNS 協議以及傳統 UDP DNS。
 
 | 協議 | 接入點地址格式 | 適用場景 |
 | :--- | :--- | :--- |
-| **DoH (DNS over HTTPS)** | `https://<domain>/dns-query/<profileKey>` | 瀏覽器、Windows 11、iOS/macOS 描述檔案、curl |
-| **DoT (DNS over TLS)** | `tls://<profileKey>.<dotDomain>:853` | Linux `systemd-resolved`、Stubby、Android 原生私有 DNS |
+| **DoH (DNS over HTTPS)** | `https://<domain>/dns-query/<profileKey>` | 相容 HTTP/2 與 HTTP/3，適用於瀏覽器、Windows 11、iOS/macOS 描述檔案、curl |
+| **DoT (DNS over TLS)** | `tls://<profileKey>.<dotDomain>:853` | 相容 DoQ (RFC 9250)，適用於 Linux `systemd-resolved`、Stubby、Android 原生私有 DNS |
 | **Android 私有 DNS** | `<profileKey>.<dotDomain>` | Android 9+ 系統自帶私有 DNS |
 | **傳統 UDP (Do53)** | `udp://<server-ip>:53` | 傳統路由器、IoT 物聯網裝置、區域網測試 |
 
 > [!NOTE]
-> 在 Serverfull 模式下，DoT 接入點路由依賴 **TLS 伺服器名稱指示 (SNI)**。客戶端填入 `<profileKey>.<dotDomain>` 連線時，服務端在解密資料前即可從 TLS ClientHello 中提取子域名，實現 0 額外開銷的精準接入點分流。
+> 在 Serverfull 模式下，DoT 接入點路由依賴 **TLS 伺服器名稱指示 (SNI)**。客戶端填入 `<profileKey>.<dotDomain>` 連線時，服務端在解密資料前即可從 TLS ClientHello 中提取子域名，實現 0 額外開銷的精準接入點分流。同時相容基於 QUIC 協議的 DoQ 傳輸。
 
 ---
 

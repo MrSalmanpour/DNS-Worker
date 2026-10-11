@@ -16,7 +16,7 @@ export function getFlagEmoji(countryCode?: string | null): string {
     upper === "PRIVATE" ||
     upper === "PRIVATE NETWORK"
   ) {
-    return "🏠";
+    return "🛜";
   }
   if (upper.length !== 2) {
     return "🌐";

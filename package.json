@@ -1,6 +1,6 @@
 {
   "name": "dns-worker",
-  "version": "1.1.1",
+  "version": "1.1.3",
   "private": false,
   "description": "Privacy-first DNS & DoH Resolver with modern Web Dashboard, built for Cloudflare Workers & Node.js",
   "main": "./dist/serverfull.mjs",
@@ -27,6 +27,10 @@
     "build:serverfull": "npm run ui:build && npx esbuild src/serverfull/index.ts --bundle --platform=node --target=node24 --format=esm --outfile=dist/serverfull.mjs --banner:js=\"#!/usr/bin/env node\" --external:node:sqlite --minify --sourcemap --tree-shaking=true --legal-comments=none",
     "prepublishOnly": "npm run build:serverfull",
     "service-create:linux": "tsx scripts/create-linux-service.ts",
+    "docker:build": "tsx scripts/docker.ts build",
+    "docker:build:multiarch": "tsx scripts/docker.ts multiarch",
+    "docker:push": "tsx scripts/docker.ts push",
+    "docker:run": "tsx scripts/docker.ts run",
     "docs:dev": "npm --prefix docs run dev",
     "docs:build": "npm --prefix docs run build",
     "docs:convert-tw": "npm --prefix docs run convert-tw",
@@ -52,7 +56,9 @@
   "keywords": [
     "dns",
     "cloudflare-workers",
-    "doh"
+    "doh",
+    "ad-blocking",
+    "privacy"
   ],
   "author": "Hugo Koo",
   "license": "AGPL-3.0-or-later",

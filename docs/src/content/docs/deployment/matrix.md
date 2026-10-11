@@ -12,7 +12,7 @@ Whether you prioritize global edge acceleration with zero maintenance across 300
 | **Core Value** | **Global Ultra-Low Latency, Zero Maintenance** | 100% Data Sovereignty, Home LAN/Router, Android DoT |
 | **Runtime Platform** | **Cloudflare Global 300+ Edge Locations** | Linux / VPS / macOS / Windows (`Node.js >= 22.5` / `Bun >= 1.4`) |
 | **Storage Engine** | **Cloudflare D1 (Global Distributed SQL)** | Native SQLite (`node:sqlite`) on NVMe/SSD |
-| **Supported Protocols** | **DoH** (RFC 8484 over HTTP/2 & HTTP/3) | **UDP 53** (RFC 1035) + **DoT 853** (RFC 7858) + **DoH** |
+| **Supported Protocols** | **DoH** (RFC 8484, HTTP/2 & HTTP/3 compatible) | **UDP 53** (RFC 1035) + **DoT 853** (RFC 7858, DoQ compatible) + **DoH** (HTTP/2 & HTTP/3 compatible) |
 | **Infrastructure Overhead** | **Zero Server Maintenance**, auto-scaling worldwide | Requires host maintenance, OS patching, systemd daemon |
 | **Router / LAN Integration** | Forward via DoH proxy (AdGuard Home, OpenWrt) | **Direct UDP 53** (Point router DNS directly to server IP) |
 | **Android Private DNS** | Native DoH URL or third-party client | **Native DoT 853** with SNI routing (`<token>.dns.example.com`) |

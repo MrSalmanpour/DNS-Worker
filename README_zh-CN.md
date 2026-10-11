@@ -8,11 +8,13 @@
   </p>
 
 [![License: AGPL v3](https://img.shields.io/badge/License-AGPL%20v3-blue.svg)](LICENSE)
+[![npm: dns-worker](https://img.shields.io/npm/v/dns-worker.svg?logo=npm&color=CB3837)](https://www.npmjs.com/dns-worker)
+[![Docker: hugokoo/dns-worker](https://img.shields.io/badge/docker-hugokoo%2Fdns--worker-2496ED.svg?logo=docker)](https://hub.docker.com/r/hugokoo/dns-worker)
 [![Platform: Cloudflare Workers](https://img.shields.io/badge/Platform-Cloudflare%20Workers-orange.svg)](https://workers.cloudflare.com/)
 [![Runtime: Node.js / Bun](https://img.shields.io/badge/Runtime-Node.js%20%7C%20Bun-green.svg)](https://nodejs.org/)
 [![Security: NIST FIPS 203 PQC](https://img.shields.io/badge/Security-NIST%20FIPS%20203%20PQC-purple.svg)](https://csrc.nist.gov/pubs/fips/203/final)
 [![Docs: Astro Starlight](https://img.shields.io/badge/Docs-Astro%20Starlight-blueviolet.svg)](https://obein.github.io/DNS-Worker/)
-[![Protocols: UDP 53 · DoT 853 · DoH](https://img.shields.io/badge/Protocols-UDP%2053%20%7C%20DoT%20853%20%7C%20DoH-brightgreen.svg)](https://obein.github.io/DNS-Worker/deployment/matrix/)
+[![Protocols: UDP 53 · DoT / DoQ · DoH (H2/H3)](https://img.shields.io/badge/Protocols-UDP%2053%20%7C%20DoT%20%2F%20DoQ%20%7C%20DoH%20(H2%2FH3)-brightgreen.svg)](https://obein.github.io/DNS-Worker/deployment/matrix/)
 
 </div>
 
@@ -20,10 +22,10 @@
 
 ## 📖 序
 
-**DNS Worker** 是一套专为隐私与性能而生的 Protective DNS 解析系统，采用独创的**双引擎架构**：
+**DNS Worker** 是一套专为隐私、安全与性能而生的 Protective DNS 解析系统，原生支持广告与恶意域名拦截，采用独创的**双引擎架构**：
 
-- **☁️ 边缘模式 (Serverless)**：运行在 Cloudflare 全球 300+ 城市边缘节点，配合 D1 数据库享受零运维的高可用 DoH 服务。
-- **🖥️ 独立服务器模式 (Serverfull)**：脱离 Cloudflare，运行在自有 VPS 或家庭服务器（Linux/Windows/macOS），原生支持经典 **UDP 53**、**DoT 853**（TLS SNI 路由，原生适配 Android 私有 DNS）与本地 SQLite；
+- **☁️ 边缘模式 (Serverless)**：运行在 Cloudflare 全球 300+ 城市边缘节点，配合 D1 数据库享受零运维的高可用 DoH 服务（全面兼容 HTTP/2 与 HTTP/3）。
+- **🖥️ 独立服务器模式 (Serverfull)**：脱离 Cloudflare，运行在自有 VPS 或家庭服务器（Linux/Windows/macOS），原生支持经典 **UDP 53**、**DoT 853**（兼容 DoQ 并支持 TLS SNI 路由，原生适配 Android 私有 DNS）与本地 SQLite；
 
 > 📚 **用户文档**  
 > 👉 [**https://obein.github.io/DNS-Worker/**](https://obein.github.io/DNS-Worker/)
@@ -42,11 +44,29 @@ dns-worker
 # 访问控制台: http://localhost:10080
 ```
 
+#### 容器化一键部署 (Docker / Bun LTS)
+```bash
+# 后台启动并直接映射 443 端口与 TLS 证书（建议通过 443 访问；满足证书时 80 端口自动重定向至 HTTPS）
+docker run -d \
+  --name dns-worker \
+  --restart unless-stopped \
+  -p 53:53/udp \
+  -p 853:853/tcp \
+  -p 80:80/tcp \
+  -p 443:443/tcp \
+  -v dns_worker_data:/var/lib/dns-worker \
+  -v dns_worker_config:/etc/dns-worker \
+  -v /etc/letsencrypt:/etc/ssl/dns-worker:ro \
+  hugokoo/dns-worker:latest
+
+# 访问控制台: https://your-domain-or-ip (配置证书后，80 端口自动跳转 HTTPS)
+```
+
 ### 核心功能
-- ⚡ **全栈协议**：UDP 53、DoT 853、DoH (HTTP/2 & HTTP/3)、DoQ (RFC 9250)、ECH 与 DDR (RFC 9460)。
+- ⚡ **全栈协议**：UDP 53、DoT 853 (兼容 DoQ RFC 9250)、DoH (兼容 HTTP/2 与 HTTP/3)、ECH 与 DDR (RFC 9460)。
 - 🛡️ **后量子零知识 E2EE**：NIST FIPS 203 **P256-MLKEM768** 混合格密码学 + 硬件通行密钥（Passkey / WebAuthn）。
 - 🚀 **本地优先 (Local-First)**：浏览器端 WebAssembly SQLite + OPFS，0ms 瞬间日志查询与统计分析。
-- 🛡️ **精细防护策略**：域名通配过滤、百万级外部规则布隆过滤器秒级命中、自定义解析覆盖与 ECH 伪装。
+- 🛡️ **精细防护与广告拦截**：广告与恶意域名拦截、域名通配过滤、百万级外部规则布隆过滤器秒级命中、自定义解析覆盖与 ECH 伪装。
 
 ---
 

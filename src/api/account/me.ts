@@ -128,6 +128,9 @@ export async function handleMeRequest(
 
   // GET /api/account/db-size
   if (action === 'db-size' && request.method === 'GET') {
+    if (user.role !== 'admin') {
+      return new Response("Forbidden", { status: 403 });
+    }
     const sizeInfo = await getDatabaseStorageSize(env);
     return new Response(JSON.stringify(sizeInfo), {
       headers: { "Content-Type": "application/json" }

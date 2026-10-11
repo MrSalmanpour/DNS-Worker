@@ -401,6 +401,28 @@ export function getServerfullConfig(cliArgs?: ServerfullCliArgs): { config: Serv
     ''
   ).trim();
 
+  // Support automatic default TLS discovery if not explicitly specified
+  let effectiveKeyPath = tlsKeyPath;
+  let effectiveCertPath = tlsCertPath;
+
+  if (!effectiveKeyPath && !effectiveCertPath) {
+    const candidatePairs = [
+      { cert: '/etc/ssl/dns-worker/fullchain.pem', key: '/etc/ssl/dns-worker/privkey.pem' },
+      { cert: '/etc/ssl/dns-worker/cert.pem', key: '/etc/ssl/dns-worker/key.pem' },
+      { cert: '/etc/dns-worker/certs/fullchain.pem', key: '/etc/dns-worker/certs/privkey.pem' },
+      { cert: '/etc/dns-worker/certs/cert.pem', key: '/etc/dns-worker/certs/key.pem' }
+    ];
+    for (const pair of candidatePairs) {
+      try {
+        if (fs.existsSync(pair.cert) && fs.existsSync(pair.key)) {
+          effectiveCertPath = pair.cert;
+          effectiveKeyPath = pair.key;
+          break;
+        }
+      } catch {}
+    }
+  }
+
   const udpPort = parseInt(cliArgs?.['dns-port'] || process.env.SERVERFULL_UDP_PORT || process.env.DNS_PORT || '53', 10);
   const dotPort = parseInt(cliArgs?.['dot-port'] || process.env.SERVERFULL_DOT_PORT || process.env.DOT_PORT || '853', 10);
   const dotDomain = (cliArgs?.['dot-domain'] || process.env.SERVERFULL_DOT_DOMAIN || process.env.DOT_DOMAIN || '').trim();
@@ -420,8 +442,8 @@ export function getServerfullConfig(cliArgs?: ServerfullCliArgs): { config: Serv
   const echFrontingDomain = (cliArgs?.['ech-fronting-domain'] || process.env.SERVERFULL_ECH_FRONTING_DOMAIN || 'cloudflare-ech.com').trim();
 
   const config: ServerfullConfig = {
-    tlsKeyPath,
-    tlsCertPath,
+    tlsKeyPath: effectiveKeyPath,
+    tlsCertPath: effectiveCertPath,
     udpPort,
     dotPort,
     dotDomain,
