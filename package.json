@@ -52,7 +52,9 @@
   "keywords": [
     "dns",
     "cloudflare-workers",
-    "doh"
+    "doh",
+    "ad-blocking",
+    "privacy"
   ],
   "author": "Hugo Koo",
   "license": "AGPL-3.0-or-later",
