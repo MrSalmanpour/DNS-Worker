@@ -85,23 +85,40 @@ async function runDbSizeTests(): Promise<void> {
     'Database size must grow or stay equal after inserting logs'
   );
 
-  // 3. Test API endpoint GET /api/account/db-size
-  console.log('>>> [TEST] 3. GET /api/account/db-size endpoint');
+  // 3. Test API endpoint GET /api/account/db-size (Admin only)
+  console.log('>>> [TEST] 3. GET /api/account/db-size endpoint (Admin only)');
   const dummyUser: User = {
     id: 'test_user_owner',
     username: 'test_owner',
     role: 'user'
+  };
+  const dummyAdmin: User = {
+    id: 'test_admin_owner',
+    username: 'test_admin',
+    role: 'admin'
   };
   const dummyCtx = {
     waitUntil() {},
     passThroughOnException() {}
   } as unknown as ExecutionContext;
 
+  // Non-admin request must be rejected with 403 Forbidden
+  const getForbiddenReq = new Request('http://localhost/api/account/db-size', { method: 'GET' });
+  const getForbiddenRes = await handlePersonalAccountRequest(
+    getForbiddenReq,
+    dummyEnv,
+    dummyUser,
+    ['api', 'account', 'db-size'],
+    dummyCtx
+  );
+  assert.strictEqual(getForbiddenRes.status, 403, 'Non-admin user must receive 403 Forbidden');
+
+  // Admin request must succeed with 200 OK
   const getReq = new Request('http://localhost/api/account/db-size', { method: 'GET' });
   const getRes = await handlePersonalAccountRequest(
     getReq,
     dummyEnv,
-    dummyUser,
+    dummyAdmin,
     ['api', 'account', 'db-size'],
     dummyCtx
   );
