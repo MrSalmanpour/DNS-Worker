@@ -43,6 +43,24 @@ dns-worker
 # Web Dashboard: http://localhost:10080
 ```
 
+#### Standalone Server via Docker (Bun LTS)
+```bash
+# Run container with HTTPS (443), DoT (853), classic DNS (53), and TLS certificates
+docker run -d \
+  --name dns-worker \
+  --restart unless-stopped \
+  -p 53:53/udp \
+  -p 853:853/tcp \
+  -p 80:80/tcp \
+  -p 443:443/tcp \
+  -v dns_worker_data:/var/lib/dns-worker \
+  -v dns_worker_config:/etc/dns-worker \
+  -v /etc/letsencrypt:/etc/ssl/dns-worker:ro \
+  dns-worker:latest
+
+# Web Dashboard: https://your-domain-or-ip (HTTP on port 80 auto-redirects to HTTPS 443)
+```
+
 ### Key Highlights
 - ⚡ **Full-Stack Protocols**: UDP 53, DoT 853 (DoQ RFC 9250 compatible), DoH (HTTP/2 & HTTP/3 compatible), ECH & DDR (RFC 9460).
 - 🛡️ **Post-Quantum Zero-Knowledge E2EE**: NIST FIPS 203 **P256-MLKEM768** hybrid lattice cryptography + Hardware Passkeys (WebAuthn).

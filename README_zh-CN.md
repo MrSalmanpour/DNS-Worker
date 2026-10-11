@@ -43,6 +43,24 @@ dns-worker
 # 访问控制台: http://localhost:10080
 ```
 
+#### 容器化一键部署 (Docker / Bun LTS)
+```bash
+# 后台启动并直接映射 443 端口与 TLS 证书（建议通过 443 访问；满足证书时 80 端口自动重定向至 HTTPS）
+docker run -d \
+  --name dns-worker \
+  --restart unless-stopped \
+  -p 53:53/udp \
+  -p 853:853/tcp \
+  -p 80:80/tcp \
+  -p 443:443/tcp \
+  -v dns_worker_data:/var/lib/dns-worker \
+  -v dns_worker_config:/etc/dns-worker \
+  -v /etc/letsencrypt:/etc/ssl/dns-worker:ro \
+  dns-worker:latest
+
+# 访问控制台: https://your-domain-or-ip (配置证书后，80 端口自动跳转 HTTPS)
+```
+
 ### 核心功能
 - ⚡ **全栈协议**：UDP 53、DoT 853 (兼容 DoQ RFC 9250)、DoH (兼容 HTTP/2 与 HTTP/3)、ECH 与 DDR (RFC 9460)。
 - 🛡️ **后量子零知识 E2EE**：NIST FIPS 203 **P256-MLKEM768** 混合格密码学 + 硬件通行密钥（Passkey / WebAuthn）。

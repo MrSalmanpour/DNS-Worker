@@ -39,6 +39,58 @@ dns-worker config init
 
 ---
 
+## 容器化部署 (Docker / Bun LTS 執行階段)
+
+DNS Worker 提供官方容器映像檔建置流程，基於 **Bun LTS** (`oven/bun:1-slim`) 最小化執行基底，具備極低記憶體佔用與毫秒級冷啟動特性。
+
+### Docker 極速運行
+
+以背景分離模式執行容器，直接對應 443 埠並掛載持久化資料、設定與 TLS 憑證磁碟區：
+
+```bash
+docker run -d \
+  --name dns-worker \
+  --restart unless-stopped \
+  -p 53:53/udp \
+  -p 853:853/tcp \
+  -p 80:80/tcp \
+  -p 443:443/tcp \
+  -v dns_worker_data:/var/lib/dns-worker \
+  -v dns_worker_config:/etc/dns-worker \
+  -v /etc/letsencrypt:/etc/ssl/dns-worker:ro \
+  dns-worker:latest
+```
+
+> [!TIP]
+> **HTTPS 自動重新導向**：正式生產環境中不建議直接透過純 HTTP 埠存取。當在 `/etc/ssl/dns-worker` 掛載 TLS 憑證（或設定 `SERVERFULL_TLS_CERT_PATH`）後，DNS Worker 將自動啟用 443 埠的 HTTPS 服務，並且 **所有存取 80 埠的純 HTTP 請求將自動 301/307 跳轉至 HTTPS**。
+
+### 連接埠與資料磁碟區對應規範
+
+- **網路連接埠**：
+  - `53:53/udp`：經典 UDP DNS（RFC 1035）
+  - `853:853/tcp`：加密 DoT（RFC 7858，相容 DoQ）
+  - `80:80/tcp`：HTTP Web 主控台（設定憑證後自動跳轉至 HTTPS 443）
+  - `443:443/tcp`：HTTPS Web 主控台與 DoH 解析介面（主要/建議存取方式）
+- **持久化資料磁碟區**：
+  - `/var/lib/dns-worker`：儲存 SQLite 資料庫檔案（`dns_worker.sqlite`）與自動持久化的 JWT 金鑰
+  - `/etc/dns-worker`：掛載主機目錄以提供自訂 `.env` 設定檔案
+  - `/etc/ssl/dns-worker`：掛載 TLS 憑證鏈與私鑰（`fullchain.pem` 與 `privkey.pem`），系統啟動時自動識別並啟用 HTTPS / DoT
+
+### 打包與發布至 Docker Hub
+
+```bash
+# 本地建置映像檔（自動讀取 package.json 版本並加上標籤）
+npm run docker:build -- --repo=yourusername/dns-worker
+
+# 多架構打包（linux/amd64, linux/arm64）並發布至 Docker Hub
+npm run docker:multiarch -- --repo=yourusername/dns-worker --push
+
+# 推送本地標籤至 Docker Hub
+npm run docker:push -- --repo=yourusername/dns-worker
+```
+
+---
+
 ## 埠與網路配置
 
 在 `.env` 中可自由指定監聽的埠和繫結地址：

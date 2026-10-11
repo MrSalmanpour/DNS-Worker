@@ -19,6 +19,10 @@ export interface HttpServerOptions {
   host: string;
   staticDir?: string;
   env: Env;
+  httpsRedirect?: {
+    enabled: boolean;
+    httpsPort: number;
+  };
 }
 
 export interface HttpsServerOptions {
@@ -202,11 +206,29 @@ export function createHttpRequestHandler(
   env: Env,
   defaultProto: 'http' | 'https',
   host: string,
-  port: number
+  port: number,
+  httpsRedirect?: { enabled: boolean; httpsPort: number }
 ): (req: http.IncomingMessage, res: http.ServerResponse) => Promise<void> {
   return async (req: http.IncomingMessage, res: http.ServerResponse): Promise<void> => {
     try {
-      const proto = (req.headers['x-forwarded-proto'] as string) || defaultProto;
+      const forwardedProto = (req.headers['x-forwarded-proto'] as string | undefined)?.toLowerCase();
+      const proto = forwardedProto || defaultProto;
+
+      // When TLS certificates are configured and HTTPS is active, automatically redirect plain HTTP requests to HTTPS
+      if (defaultProto === 'http' && httpsRedirect?.enabled && forwardedProto !== 'https') {
+        const hostHeader = (req.headers.host || `${host}:${port}`).trim();
+        const hostname = hostHeader.replace(/:\d+$/, '');
+        const targetPort = (httpsRedirect.httpsPort === 443 || httpsRedirect.httpsPort === 0) ? '' : `:${httpsRedirect.httpsPort}`;
+        const targetUrl = `https://${hostname}${targetPort}${req.url || '/'}`;
+
+        res.statusCode = (req.method === 'GET' || req.method === 'HEAD') ? 301 : 307;
+        res.setHeader('Location', targetUrl);
+        res.setHeader('Connection', 'close');
+        res.setHeader('Content-Type', 'text/plain; charset=utf-8');
+        res.end(`Redirecting to ${targetUrl}`);
+        return;
+      }
+
       const hostHeader = req.headers.host || `${host}:${port}`;
       const fullUrl = new URL(req.url || '/', `${proto}://${hostHeader}`);
 
@@ -335,8 +357,8 @@ export class HttpServer {
 
   start(): Promise<void> {
     return new Promise((resolve, reject) => {
-      const { port, host, env } = this.options;
-      const handler = createHttpRequestHandler(env, 'http', host, port);
+      const { port, host, env, httpsRedirect } = this.options;
+      const handler = createHttpRequestHandler(env, 'http', host, port, httpsRedirect);
 
       this.server = http.createServer(handler);
 
@@ -369,7 +391,10 @@ export class HttpServer {
           console.error('[HTTP Server] Runtime error:', err);
         });
         this.isRunning = true;
-        console.log(`[HTTP Server] Web Dashboard & DoH listening on http://${host}:${port}`);
+        const redirectNotice = httpsRedirect?.enabled
+          ? ` (Auto-redirecting to HTTPS on port ${httpsRedirect.httpsPort})`
+          : '';
+        console.log(`[HTTP Server] Web Dashboard & DoH listening on http://${host}:${port}${redirectNotice}`);
         resolve();
       });
     });
