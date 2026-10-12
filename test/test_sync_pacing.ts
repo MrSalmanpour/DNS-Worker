@@ -1,12 +1,13 @@
 import assert from 'node:assert';
 import { fetchListContent } from '../src/utils/listFetcher';
 import { syncSingleList } from '../src/utils/sync/singleListSync';
-import { MemoryCache } from '../src/serverfull/cache';
+import { MemoryCache, initNodeGlobals } from '../src/serverfull/cache';
 import { resolveDefaultProfile } from '../src/api/doh';
 import { defaultProfileMemoryCache, setDefaultProfileMemoryCache } from '../src/pipeline/cache';
 
 async function runTests() {
   console.log('>>> [TEST] Running SingleListSync Pacing & Sync Window Tests...');
+  initNodeGlobals();
 
   // 1. Test MemoryCache maxEntries & LRU eviction
   console.log('1. Testing MemoryCache LRU eviction & capacity cap...');
@@ -25,8 +26,8 @@ async function runTests() {
   assert.strictEqual(await m6.text(), 'value-6');
   console.log('   ✓ MemoryCache properly bounds size and evicts oldest items');
 
-  // 2. Test resolveDefaultProfile L1 in-memory cache
-  console.log('2. Testing resolveDefaultProfile L1 in-memory cache...');
+  // 2. Test resolveDefaultProfile fallback and L1 in-memory cache
+  console.log('2. Testing resolveDefaultProfile unauthenticated fallback & L1 in-memory cache...');
   setDefaultProfileMemoryCache(null); // Clear first
   let sqliteQueryCount = 0;
 
@@ -46,26 +47,42 @@ async function runTests() {
     }
   } as any;
 
-  const env = { DB: mockDb, JWT_SECRET: 'testsecret1234567890123456789012' } as any;
+  const unauthEnv = { DB: mockDb, JWT_SECRET: 'testsecret1234567890123456789012' } as any;
   const ctx = { waitUntil() {} } as any;
 
-  const prof1 = await resolveDefaultProfile(env, ctx);
-  assert.ok(prof1, 'Should resolve profile');
+  // Unauthenticated call must fall back to FAIL_OPEN_UPSTREAM without querying SQLite
+  const fallbackProf = await resolveDefaultProfile(unauthEnv, ctx);
+  assert.ok(fallbackProf, 'Should resolve fallback profile');
+  assert.strictEqual(fallbackProf.id, 'default', 'Unauthenticated request must fall back to default profile');
+  assert.strictEqual(sqliteQueryCount, 0, 'Unauthenticated lookup must NOT query SQLite or hijack user profiles');
+  const fallbackSettings = JSON.parse(fallbackProf.settings);
+  assert.strictEqual(fallbackSettings.log_retention_days, 0, 'Fallback profile must have zero log retention');
+  assert.ok(fallbackSettings.upstream[0].includes('controld'), 'Fallback profile must use FAIL_OPEN_UPSTREAM');
+
+  // Configured default key lookup must resolve via key and populate L1 cache
+  setDefaultProfileMemoryCache(null);
+  const configuredEnv = {
+    ...unauthEnv,
+    SERVERFULL_DEFAULT_PROFILE_KEY: 'testkey123'
+  };
+
+  const prof1 = await resolveDefaultProfile(configuredEnv, ctx);
+  assert.ok(prof1, 'Should resolve configured profile');
   const initialCount = sqliteQueryCount;
-  assert.ok(initialCount > 0, 'First lookup should query SQLite');
+  assert.ok(initialCount > 0, 'First configured lookup should query SQLite');
 
   // Second and third queries should hit in-memory L1 cache without touching SQLite
-  const prof2 = await resolveDefaultProfile(env, ctx);
-  const prof3 = await resolveDefaultProfile(env, ctx);
+  const prof2 = await resolveDefaultProfile(configuredEnv, ctx);
+  const prof3 = await resolveDefaultProfile(configuredEnv, ctx);
   assert.strictEqual(sqliteQueryCount, initialCount, 'Subsequent lookups MUST hit L1 cache with 0 SQLite queries');
   assert.strictEqual(prof2?.id, prof1?.id);
   assert.strictEqual(prof3?.id, prof1?.id);
-  console.log('   ✓ resolveDefaultProfile eliminates 100% of SQLite queries via L1 memory cache');
+  console.log('   ✓ resolveDefaultProfile safely falls back to FAIL_OPEN_UPSTREAM and eliminates SQLite queries via L1 memory cache');
 
   // 3. Test listFetcher with synchronous consumer (zero promise allocation for normal lines)
   console.log('3. Testing listFetcher with synchronous consumer & mocked fetch...');
   const originalFetch = globalThis.fetch;
-  const mockUrl = 'https://example.com/mock-list.txt';
+  const mockUrl = 'http://93.184.216.34/mock-list.txt';
 
   const generateDomainStream = () => {
     let domainLines = '';
