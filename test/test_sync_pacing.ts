@@ -3,7 +3,7 @@ import { fetchListContent } from '../src/utils/listFetcher';
 import { syncSingleList } from '../src/utils/sync/singleListSync';
 import { MemoryCache, initNodeGlobals } from '../src/serverfull/cache';
 import { resolveDefaultProfile } from '../src/api/doh';
-import { defaultProfileMemoryCache, setDefaultProfileMemoryCache } from '../src/pipeline/cache';
+import { setDefaultProfileMemoryCache } from '../src/pipeline/cache';
 
 async function runTests() {
   console.log('>>> [TEST] Running SingleListSync Pacing & Sync Window Tests...');
