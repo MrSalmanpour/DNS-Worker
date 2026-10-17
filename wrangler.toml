@@ -1,15 +1,23 @@
+
 # Cloudflare Worker project name.
 name = "dns-worker"
+
 # TypeScript entry point for the Worker.
 main = "src/index.ts"
+
 # Runtime compatibility date used by Cloudflare Workers.
 compatibility_date = "2026-02-28"
+
 # Enable Node.js-compatible APIs required by the application.
 compatibility_flags = ["nodejs_compat"]
+
 # account_id = ""
+
 # Minify the deployed Worker bundle.
 minify = true
+
 # workers_dev = false
+
 # Disable preview URLs for deployed versions.
 preview_urls = false
 
@@ -20,65 +28,49 @@ command = "npm run build"
 [assets]
 # Local directory containing static files.
 directory = "./static"
-# Binding name used to access static assets from the Worker.
 binding = "ASSETS"
-# Force the Worker to run first for all incoming requests (API, DoH, SPA rewriting)
 run_worker_first = true
 
-# D1 Database for Profiles, Rules and Logs
+# D1 Database for Profiles, Rules and Logs.
 [[d1_databases]]
 binding = "DB"
-database_name = "dns_worker_db"
-# This field must be filled with your database ID; otherwise the deployment will fail.
-database_id = "13d8c24f-064a-40d6-8b10-fa70bb3f79ab"
+database_name = "dns-worker-db"
+database_id = "61968366-b339-4afc-a07e-be44986f2be3"
 
 [triggers]
 # Run scheduled maintenance tasks every minute.
 crons = ["* * * * *"]
 
 [placement]
-# mode = "targeted"
-# region = "aws:ap-southeast-1"
-# Or
-# hostname = "dbs.com.sg"
-# Or
-# mode = "smart"
-# Or
 mode = "off"
 
 [observability]
-# Enable Worker observability features.
 enabled = true
-# Sample one percent of invocations.
 head_sampling_rate = 0.01
 
 [observability.logs]
-# Enable invocation log collection.
 enabled = true
 invocation_logs = true
-# Sample one in every one thousand log events.
 head_sampling_rate = 0.001
 
 [vars]
-# Runtime configuration values exposed to the Worker.
-# Recommended: configure JWT_SECRET via Worker Secrets / Environment Variables
-# (e.g. `npx wrangler secret put JWT_SECRET` or via dashboard) to keep secrets out of git.
-# JWT_SECRET = ""
-# (Optional) Cloudflare Zone Cache Purge by Tag.
-# When configured, profile config and bloom cache updates will be purged globally across all Cloudflare data centers by Cache-Tag.
-# CF_ZONE_ID can be configured here or in environment variables; CF_PURGE_TOKEN should be stored in Worker Secrets (e.g. `npx wrangler secret put CF_PURGE_TOKEN`).
-# Requires an API token with "Zone -> Cache Purge -> Purge" permission.
+# Configure JWT_SECRET separately using Cloudflare Worker Secrets.
+# Do not put secrets in this file.
 # CF_ZONE_ID = ""
-# CF_PURGE_TOKEN = ""
+# CF_PURGE_TOKEN must be configured as a secret if needed.
+
 # Default upstream for fail-open emergency fallback.
-# Supports HTTPS (DoH, e.g. "https://security.cloudflare-dns.com/dns-query"), TLS/DoT (e.g. "tls://1.1.1.1" or "tls://dns.google:853"), TCP (e.g. "tcp://1.1.1.1:53"), and DNS Stamps ("sdns://...").
 FAIL_OPEN_UPSTREAM = "https://freedns.controld.com/no-ads-malware-typo"
-# Maximum number of access points allowed per profile
+
+# Maximum number of access points allowed per profile.
 MAX_ACCESS_POINTS_PER_PROFILE = 100
-# Maximum number of profiles allowed per user
+
+# Maximum number of profiles allowed per user.
 MAX_PROFILES_PER_USER = 10
-# Used to resolve DoH domains
-SUBSTITUTE_DOMAIN="www.okx.com"
+
+# Used to resolve DoH domains.
+SUBSTITUTE_DOMAIN = "www.okx.com"
+
 IP_REGION_CN = """
 [
   {
@@ -99,39 +91,25 @@ IP_REGION_CN = """
   }
 ]
 """
-# Time constants
-# Session duration for authenticated users by default (in minutes)
-DEFAULT_SESSION_EXPIRATION_MINUTES=1440
-# Session duration for authenticated users when keeping logged in option is selected (in days)
-OPTIONAL_SESSION_EXPIRATION_DAYS=7
-# Access Token expiration time (in minutes)
-ACCESS_TOKEN_EXPIRATION_MINUTES=1
-# Maximum allowed distance (in km) between session login and current request
-SESSION_GEO_DISTANCE_KM=50
-# TTL for temporary pre-auth session during login (in seconds)
-PREAUTH_TTL_SECONDS=300
-# In-memory retention time for profile bloom filters (in milliseconds)
-BLOOM_MEM_TTL=600000
-# Timeout threshold when downloading upstream blocklists (in milliseconds)
-SYNC_TIMEOUT_MS=30000
-# Number of days of inactivity before an account is cleared by cron jobs
-INACTIVITY_THRESHOLD_DAYS=180
-# Throttle interval for updating session "last active" status in D1 (in seconds)
-SESSION_LAST_ACTIVE_UPDATE_INTERVAL=60
-# In-memory authentication micro-cache TTL for dashboard requests (in seconds)
-AUTH_CACHE_TTL_SEC=30
-# Throttle interval for updating profile "last active" status (in seconds)
-THROTTLE_ACTIVE_SEC=3600
-# Minimum interval between automated blocklist profile syncs (in seconds)
-SYNC_PROFILE_INTERVAL_SEC=86400
-# Maximum log rows deleted per cron cleanup run across all profiles (prevents write quota exhaustion)
-LOG_CLEANUP_BATCH_LIMIT=1000
-# Daily budget for log row deletions across all profiles (default: 20000, 20% of 100k daily write quota)
-LOG_CLEANUP_DAILY_BUDGET=20000
-# Minimum query count threshold for domain hourly rollup aggregation (filters single-query noise domains)
-DOMAIN_ROLLUP_MIN_COUNT=2
 
-# Preset Upstream Services
+# Time constants.
+DEFAULT_SESSION_EXPIRATION_MINUTES = 1440
+OPTIONAL_SESSION_EXPIRATION_DAYS = 7
+ACCESS_TOKEN_EXPIRATION_MINUTES = 1
+SESSION_GEO_DISTANCE_KM = 50
+PREAUTH_TTL_SECONDS = 300
+BLOOM_MEM_TTL = 600000
+SYNC_TIMEOUT_MS = 30000
+INACTIVITY_THRESHOLD_DAYS = 180
+SESSION_LAST_ACTIVE_UPDATE_INTERVAL = 60
+AUTH_CACHE_TTL_SEC = 30
+THROTTLE_ACTIVE_SEC = 3600
+SYNC_PROFILE_INTERVAL_SEC = 86400
+LOG_CLEANUP_BATCH_LIMIT = 1000
+LOG_CLEANUP_DAILY_BUDGET = 20000
+DOMAIN_ROLLUP_MIN_COUNT = 2
+
+# Preset Upstream Services.
 PRESET_UPSTREAMS = """
 [
   {
@@ -189,7 +167,7 @@ PRESET_UPSTREAMS = """
 ]
 """
 
-# Preset External Filters
+# Preset External Filters.
 PRESET_EXTERNAL_FILTERS = """
 [
   {
@@ -211,7 +189,7 @@ PRESET_EXTERNAL_FILTERS = """
 ]
 """
 
-# Preset ECH Fronting (outer SNI) domains
+# Preset ECH Fronting (outer SNI) domains.
 PRESET_ECH_FRONTING_DOMAINS = """
 [
   "cloudflare-ech.com",
@@ -223,26 +201,16 @@ PRESET_ECH_FRONTING_DOMAINS = """
 ]
 """
 
-# Bloom Filter false positive rate
-# Restored to 0.0001 (1 in 10,000) — safe now because each cron trigger
-# processes only ONE list at a time (~100-150k domains), dramatically reducing
-# per-trigger CPU usage vs. the old all-at-once approach.
-BLOOM_FALSE_POSITIVE_RATE=0.0001
+# Bloom Filter false positive rate.
+BLOOM_FALSE_POSITIVE_RATE = 0.0001
 
-# 1M domains @ p=0.0001: bitArray ≈ 2.4 MB (5 × 512KB D1 chunks)
-MAX_SYNC_DOMAINS=1000000
+# 1M domains @ p=0.0001.
+MAX_SYNC_DOMAINS = 1000000
+MAX_LIST_DOMAINS = 500000
 
-# Maximum domains processed from a single list per cron trigger.
-MAX_LIST_DOMAINS=500000
-
-# Hard cap on log retention days (overrides per-profile user setting).
-# Prevents high-retention profiles (e.g. 360 days) from filling up D1's 500 MB limit.
-MAX_LOG_RETENTION_DAYS=30
-DEFAULT_LOG_RETENTION_DAYS=7
-
-NORMAL_USER_MAX_LOG_RETENTION_DAYS=7
-NORMAL_USER_DEFAULT_LOG_RETENTION_DAYS=1
-
-# Hard cap on log row count per profile. Acts as a circuit-breaker when write
-# rate temporarily exceeds cleanup rate (e.g. high-traffic profiles).
-MAX_LOGS_PER_PROFILE=500000
+# Log retention settings.
+MAX_LOG_RETENTION_DAYS = 30
+DEFAULT_LOG_RETENTION_DAYS = 7
+NORMAL_USER_MAX_LOG_RETENTION_DAYS = 7
+NORMAL_USER_DEFAULT_LOG_RETENTION_DAYS = 1
+MAX_LOGS_PER_PROFILE = 500000
